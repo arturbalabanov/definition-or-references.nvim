@@ -32,10 +32,12 @@ local function definitions()
 
         if util.cursor_not_on_result(current_bufnr, current_cursor, first_definition) then
           methods.clear_references()
+          methods.clear_implementations()
           log.trace("definitions", "Current cursor not on result")
           vim.lsp.util.jump_to_location(
             first_definition,
-            vim.lsp.get_client_by_id(context.client_id).offset_encoding
+            vim.lsp.get_client_by_id(context.client_id).offset_encoding,
+            true
           )
           return
         end
@@ -45,7 +47,8 @@ local function definitions()
       -- in such case fallback to references
       log.trace("definitions", "Current cursor on only definition")
 
-      if not methods.references.is_pending then
+      if not methods.references.is_pending and not methods.implementations.is_pending then
+        -- TODO: Rename handle_references_response, so that includes implementations
         log.trace("definitions", "handle_references_response")
         references.handle_references_response(context)
       end
